@@ -1,5 +1,6 @@
 import React from "react";
-import Lists from "./Lists"
+import Lists from "./Lists";
+import CreateList from "./CreateList";
 
 class App extends React.Component {
     constructor(props) {
@@ -25,6 +26,39 @@ class App extends React.Component {
         .catch(console.log);
     }
 
+    handleChange = (event) => {
+      let title = this.state.singledata.title;
+      let author = this.state.singledata.author;
+      if (event.target.name === 'title') title = event.target.value;
+      else author = event.target.value;
+
+      this.setState({
+        singledata:{
+          title: title,
+          author: author
+        }
+      })
+
+    }
+
+    createList = () => {
+      fetch("http://localhost:5000/posts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(this.state.singledata)
+      })
+      .then(
+        this.setState({
+          singledata: {
+            title: "",
+            author: ""
+          }   
+        })
+      );
+    }
+
     render () {
       const listTable = this.state.loading ? (
         <span>Loading Data ... ... Please be patient.</span>
@@ -40,8 +74,13 @@ class App extends React.Component {
               onClick={this.getLists}>
               Get Lists
             </button>
-            {listTable}
+            <CreateList 
+              singledata={this.state.singledata} 
+              handleChange={this.handleChange}
+              createList={this.createList}
+              />
           </span>
+          {listTable}
         </div>
       )
     }
