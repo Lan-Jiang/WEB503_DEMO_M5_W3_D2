@@ -1,6 +1,7 @@
 import React from "react";
 import Lists from "./Lists";
 import CreateList from "./CreateList";
+import UpdateList from "./UpdateList";
 
 class App extends React.Component {
     constructor(props) {
@@ -37,7 +38,7 @@ class App extends React.Component {
           title: title,
           author: author
         }
-      })
+      });
 
     }
 
@@ -48,8 +49,7 @@ class App extends React.Component {
           "Content-Type": "application/json"
         },
         body: JSON.stringify(this.state.singledata)
-      })
-      .then(
+      }).then(
         this.setState({
           singledata: {
             title: "",
@@ -59,11 +59,60 @@ class App extends React.Component {
       );
     }
 
+    getList = (event, id) => {
+        this.setState(
+          {
+            singledata: {
+              title: "Loading...",
+              author:"Loading"
+            }
+          }, 
+          () => {
+            fetch("http://localhost:5000/posts/" + id )
+            .then(res => res.json())
+            .then(result => {
+              this.setState({
+                singledata: {
+                  title: result.title,
+                  author: result.author ? result.author : ""
+                }
+              });
+            });
+          }
+        );
+    }
+
+    updateList = (event, id) => {
+      fetch("http://localhost:5000/posts/" + id, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(this.state.singledata)
+        })
+          .then(res => res.json())
+          .then(result => {
+            this.setState({
+              singledata: {
+                title: "",
+                author: ""
+              }
+            });
+            this.getLists();
+        });
+    }
+
     render () {
       const listTable = this.state.loading ? (
         <span>Loading Data ... ... Please be patient.</span>
       ): (
-        <Lists alldata={this.state.alldata} />
+        <Lists 
+          alldata={this.state.alldata} 
+          singledata={this.state.singledata}
+          getList={this.getList}
+          updateList={this.updateList}
+          handleChange={this.handleChange}
+        />
       );
       return (
         <div className="container">
